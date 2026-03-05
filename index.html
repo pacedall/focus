@@ -1,0 +1,1279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pacedall Focus</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #1B2A6B;
+    --dark-navy: #0D1B4B;
+    --gold: #F5A623;
+    --sky: #4A90D9;
+    --white: #FFFFFF;
+    --gold-rgb: 245, 166, 35;
+    --sky-rgb: 74, 144, 217;
+    --navy-rgb: 27, 42, 107;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--white);
+    color: var(--navy);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+  }
+
+  /* ── HEADER ── */
+  header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--white);
+    border-bottom: 3px solid transparent;
+    border-image: linear-gradient(90deg, var(--gold), var(--sky)) 1;
+    padding: 0 32px;
+    height: 68px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    box-shadow: 0 2px 16px rgba(0,0,0,0.06);
+  }
+
+  .logo-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    text-decoration: none;
+  }
+
+  .logo-icon {
+    width: 44px;
+    height: 44px;
+    position: relative;
+  }
+
+  .logo-icon svg { width: 44px; height: 44px; }
+
+  .logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+  }
+
+  .logo-text .brand { font-size: 20px; font-weight: 700; color: var(--dark-navy); letter-spacing: -0.3px; }
+  .logo-text .product { font-size: 14px; font-weight: 500; background: linear-gradient(90deg, var(--gold), var(--sky)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; letter-spacing: 2px; text-transform: uppercase; }
+
+  .header-badge {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--sky);
+    background: rgba(74,144,217,0.1);
+    padding: 5px 12px;
+    border-radius: 20px;
+    border: 1px solid rgba(74,144,217,0.25);
+  }
+
+  /* ── MAIN ── */
+  main {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 40px 20px 60px;
+    gap: 32px;
+  }
+
+  /* ── MODE TABS ── */
+  .mode-tabs {
+    display: flex;
+    background: #f4f6fb;
+    border-radius: 14px;
+    padding: 5px;
+    gap: 4px;
+  }
+
+  .mode-tab {
+    padding: 10px 22px;
+    border-radius: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    color: #8896b3;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    transition: all 0.25s;
+    white-space: nowrap;
+  }
+
+  .mode-tab.active {
+    background: var(--white);
+    color: var(--navy);
+    box-shadow: 0 2px 10px rgba(27,42,107,0.12);
+  }
+
+  .mode-tab:hover:not(.active) { color: var(--navy); background: rgba(255,255,255,0.6); }
+
+  /* ── SESSION LABEL ── */
+  .session-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2.5px;
+    text-transform: uppercase;
+    color: #8896b3;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .session-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--gold);
+    animation: pulse-dot 2s infinite;
+  }
+
+  .session-dot.break { background: var(--sky); }
+  .session-dot.long-break { background: var(--navy); }
+  .session-dot.custom { background: linear-gradient(135deg, var(--gold), var(--sky)); }
+
+  @keyframes pulse-dot {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.75); }
+  }
+
+  /* ── TIMER RING ── */
+  .timer-container {
+    position: relative;
+    width: 300px;
+    height: 300px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .timer-ring-svg {
+    position: absolute;
+    top: 0; left: 0;
+    transform: rotate(-90deg);
+    width: 300px; height: 300px;
+  }
+
+  .ring-track {
+    fill: none;
+    stroke: #e8ecf5;
+    stroke-width: 10;
+  }
+
+  .ring-progress {
+    fill: none;
+    stroke-width: 10;
+    stroke-linecap: round;
+    stroke: url(#timerGradient);
+    transition: stroke-dashoffset 1s linear;
+  }
+
+  .timer-inner {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .timer-display {
+    font-family: 'DM Mono', monospace;
+    font-size: 72px;
+    font-weight: 500;
+    color: var(--dark-navy);
+    letter-spacing: -2px;
+    line-height: 1;
+  }
+
+  .timer-phase {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #aab2c8;
+  }
+
+  /* ── CONTROLS ── */
+  .controls {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .btn-icon {
+    width: 52px; height: 52px;
+    border-radius: 50%;
+    border: 2px solid #e8ecf5;
+    background: var(--white);
+    color: var(--navy);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.2s;
+    font-size: 18px;
+  }
+
+  .btn-icon:hover { border-color: var(--sky); color: var(--sky); transform: scale(1.05); }
+  .btn-icon:active { transform: scale(0.97); }
+
+  .btn-primary {
+    width: 72px; height: 72px;
+    border-radius: 50%;
+    border: none;
+    background: linear-gradient(135deg, var(--gold), var(--sky));
+    color: var(--white);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 26px;
+    box-shadow: 0 6px 24px rgba(var(--gold-rgb), 0.4);
+    transition: all 0.2s;
+  }
+
+  .btn-primary:hover { transform: scale(1.06); box-shadow: 0 8px 30px rgba(var(--gold-rgb), 0.5); }
+  .btn-primary:active { transform: scale(0.97); }
+
+  /* ── POMODORO COUNT ── */
+  .pomodoro-count {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .pom-dot {
+    width: 12px; height: 12px;
+    border-radius: 50%;
+    background: #e8ecf5;
+    transition: all 0.3s;
+  }
+
+  .pom-dot.done { background: linear-gradient(135deg, var(--gold), var(--sky)); }
+  .pom-dot.active { background: var(--gold); box-shadow: 0 0 0 3px rgba(var(--gold-rgb),0.2); }
+
+  /* ── STATS ROW ── */
+  .stats-row {
+    display: flex;
+    gap: 16px;
+    width: 100%;
+    max-width: 480px;
+  }
+
+  .stat-card {
+    flex: 1;
+    background: #f4f6fb;
+    border-radius: 16px;
+    padding: 18px 20px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .stat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 16px rgba(27,42,107,0.08); }
+
+  .stat-value {
+    font-family: 'DM Mono', monospace;
+    font-size: 28px;
+    font-weight: 500;
+    color: var(--dark-navy);
+    line-height: 1;
+  }
+
+  .stat-label {
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: #aab2c8;
+    margin-top: 4px;
+  }
+
+  /* ── CUSTOM TIMER SECTION ── */
+  .custom-section {
+    width: 100%;
+    max-width: 480px;
+    background: #f4f6fb;
+    border-radius: 20px;
+    padding: 24px;
+    display: none;
+    flex-direction: column;
+    gap: 20px;
+  }
+
+  .custom-section.visible { display: flex; }
+
+  .custom-row {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .custom-row label {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+    letter-spacing: 0.5px;
+  }
+
+  .custom-slider-wrap {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .custom-slider {
+    flex: 1;
+    -webkit-appearance: none;
+    height: 6px;
+    border-radius: 3px;
+    background: linear-gradient(90deg, var(--gold), var(--sky));
+    outline: none;
+  }
+
+  .custom-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 20px; height: 20px;
+    border-radius: 50%;
+    background: var(--white);
+    border: 3px solid var(--gold);
+    cursor: pointer;
+    box-shadow: 0 2px 8px rgba(var(--gold-rgb),0.3);
+    transition: all 0.15s;
+  }
+
+  .custom-slider::-webkit-slider-thumb:hover {
+    border-color: var(--sky);
+    box-shadow: 0 2px 12px rgba(var(--sky-rgb),0.4);
+  }
+
+  .custom-val {
+    font-family: 'DM Mono', monospace;
+    font-size: 18px;
+    font-weight: 500;
+    color: var(--dark-navy);
+    min-width: 52px;
+    text-align: right;
+  }
+
+  .btn-apply {
+    padding: 13px 28px;
+    background: linear-gradient(135deg, var(--gold), var(--sky));
+    color: var(--white);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    border: none;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 4px 16px rgba(var(--gold-rgb),0.3);
+    align-self: flex-start;
+  }
+
+  .btn-apply:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(var(--gold-rgb),0.4); }
+
+  /* ── TASKS ── */
+  .tasks-section {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  .tasks-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .tasks-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: var(--navy);
+  }
+
+  .btn-add-task {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 8px 14px;
+    background: var(--white);
+    border: 2px solid #e8ecf5;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-add-task:hover { border-color: var(--gold); color: var(--gold); }
+
+  .task-input-row {
+    display: none;
+    gap: 10px;
+  }
+
+  .task-input-row.visible { display: flex; }
+
+  .task-input {
+    flex: 1;
+    padding: 12px 16px;
+    border: 2px solid #e8ecf5;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.2s;
+  }
+
+  .task-input:focus { border-color: var(--sky); }
+
+  .btn-confirm {
+    padding: 12px 18px;
+    background: var(--sky);
+    color: var(--white);
+    border: none;
+    border-radius: 10px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-confirm:hover { background: var(--navy); }
+
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .task-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 16px;
+    background: var(--white);
+    border: 2px solid #e8ecf5;
+    border-radius: 12px;
+    transition: all 0.2s;
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .task-item:hover { border-color: rgba(var(--sky-rgb),0.4); transform: translateX(3px); }
+  .task-item.done { opacity: 0.5; }
+  .task-item.done .task-name { text-decoration: line-through; }
+  .task-item.active-task { border-color: var(--gold); background: rgba(var(--gold-rgb),0.04); }
+
+  .task-check {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    border: 2px solid #d4daea;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    transition: all 0.2s;
+    font-size: 11px;
+    color: transparent;
+  }
+
+  .task-item.done .task-check { background: var(--sky); border-color: var(--sky); color: var(--white); }
+  .task-item.active-task .task-check { border-color: var(--gold); }
+
+  .task-name {
+    flex: 1;
+    font-size: 15px;
+    font-weight: 500;
+    color: var(--dark-navy);
+  }
+
+  .task-poms {
+    font-family: 'DM Mono', monospace;
+    font-size: 12px;
+    color: #aab2c8;
+  }
+
+  .task-delete {
+    width: 24px; height: 24px;
+    border-radius: 6px;
+    border: none;
+    background: transparent;
+    color: #c0c8d9;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+    transition: all 0.15s;
+    opacity: 0;
+  }
+
+  .task-item:hover .task-delete { opacity: 1; }
+  .task-delete:hover { color: #e05; background: rgba(238,0,85,0.08); }
+
+  .empty-tasks {
+    text-align: center;
+    padding: 28px 20px;
+    color: #aab2c8;
+    font-size: 14px;
+    font-weight: 500;
+    border: 2px dashed #e8ecf5;
+    border-radius: 12px;
+  }
+
+  /* ── SETTINGS PANEL ── */
+  .settings-bar {
+    width: 100%;
+    max-width: 480px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 20px;
+    background: #f4f6fb;
+    border-radius: 14px;
+  }
+
+  .settings-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+
+  .toggle-wrap {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .toggle-label {
+    font-size: 13px;
+    font-weight: 500;
+    color: #8896b3;
+  }
+
+  .toggle {
+    width: 44px; height: 24px;
+    border-radius: 12px;
+    background: #d4daea;
+    position: relative;
+    cursor: pointer;
+    transition: background 0.25s;
+    border: none;
+  }
+
+  .toggle.on { background: linear-gradient(90deg, var(--gold), var(--sky)); }
+
+  .toggle::after {
+    content: '';
+    position: absolute;
+    top: 3px; left: 3px;
+    width: 18px; height: 18px;
+    border-radius: 50%;
+    background: var(--white);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+    transition: left 0.25s;
+  }
+
+  .toggle.on::after { left: 23px; }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--dark-navy);
+    padding: 24px 32px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    margin-top: auto;
+  }
+
+  .footer-links {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+  }
+
+  .footer-links a {
+    color: rgba(255,255,255,0.6);
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: 500;
+    transition: color 0.2s;
+    padding: 8px 0;
+    min-height: 44px;
+    display: flex; align-items: center;
+  }
+
+  .footer-links a:hover { color: var(--gold); }
+
+  .footer-dot { color: rgba(255,255,255,0.2); font-size: 14px; }
+
+  .footer-copy {
+    font-size: 12px;
+    color: rgba(255,255,255,0.3);
+    font-weight: 400;
+  }
+
+  /* ── BACK TO TOP ── */
+  #backToTop {
+    position: fixed;
+    bottom: 28px;
+    right: 28px;
+    width: 46px; height: 46px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--gold), var(--sky));
+    color: var(--white);
+    border: none;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+    box-shadow: 0 4px 16px rgba(var(--gold-rgb),0.4);
+    opacity: 0;
+    transform: translateY(12px);
+    transition: all 0.3s;
+    z-index: 99;
+    pointer-events: none;
+  }
+
+  #backToTop.visible { opacity: 1; transform: translateY(0); pointer-events: all; }
+  #backToTop:hover { transform: translateY(-2px); }
+
+  /* ── NOTIFICATION TOAST ── */
+  .toast {
+    position: fixed;
+    top: 90px; right: 24px;
+    background: var(--dark-navy);
+    color: var(--white);
+    padding: 14px 20px;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(13,27,75,0.3);
+    transform: translateX(120%);
+    transition: transform 0.35s cubic-bezier(0.34,1.56,0.64,1);
+    z-index: 200;
+    max-width: 280px;
+    border-left: 4px solid var(--gold);
+  }
+
+  .toast.show { transform: translateX(0); }
+
+  /* ── ANIMATIONS ── */
+  @keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  main > * {
+    animation: fadeInUp 0.5s ease both;
+  }
+
+  main > *:nth-child(1) { animation-delay: 0.05s; }
+  main > *:nth-child(2) { animation-delay: 0.1s; }
+  main > *:nth-child(3) { animation-delay: 0.15s; }
+  main > *:nth-child(4) { animation-delay: 0.2s; }
+  main > *:nth-child(5) { animation-delay: 0.25s; }
+  main > *:nth-child(6) { animation-delay: 0.3s; }
+  main > *:nth-child(7) { animation-delay: 0.35s; }
+
+  /* ── SECTION DIVIDER ── */
+  .divider {
+    width: 100%;
+    max-width: 480px;
+    height: 2px;
+    background: linear-gradient(90deg, transparent, var(--gold), var(--sky), transparent);
+    border: none;
+    opacity: 0.35;
+  }
+
+  /* RESPONSIVE */
+  @media (max-width: 767px) {
+    header { padding: 0 16px; }
+    .logo-text .brand { font-size: 17px; }
+    .timer-display { font-size: 58px; }
+    .timer-container { width: 260px; height: 260px; }
+    .timer-ring-svg { width: 260px; height: 260px; }
+    .stats-row { flex-wrap: wrap; }
+    .mode-tab { padding: 9px 14px; font-size: 13px; }
+    footer { padding: 20px 16px; }
+    .footer-links { gap: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<!-- HEADER -->
+<header>
+  <div class="logo-wrap">
+    <!-- Pacedall Labs icon recreation in SVG, gold-to-blue shapes -->
+    <div class="logo-icon">
+      <svg viewBox="0 0 44 44" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="lg1" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stop-color="#F5A623"/>
+            <stop offset="100%" stop-color="#4A90D9"/>
+          </linearGradient>
+        </defs>
+        <!-- simplified stylised icon -->
+        <path d="M8 10 C6 10 4 12 4 15 C4 18 6 20 8 20 L20 20 C22 20 24 18 24 15 C24 12 22 10 20 10 Z" fill="url(#lg1)" opacity="0.9"/>
+        <ellipse cx="28" cy="12" rx="6" ry="5" fill="#F5A623" opacity="0.85"/>
+        <path d="M14 24 C12 24 10 26 10 29 C10 32 12 34 14 34 L24 34 C26 34 28 32 28 29 C28 26 26 24 24 24 Z" fill="#4A90D9" opacity="0.9"/>
+        <ellipse cx="34" cy="32" rx="5" ry="4" fill="#4A90D9" opacity="0.7"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="brand">Pacedall</span>
+      <span class="product">Focus</span>
+    </div>
+  </div>
+  <div class="header-badge">Free</div>
+</header>
+
+<!-- MAIN -->
+<main>
+
+  <!-- MODE TABS -->
+  <div class="mode-tabs" role="tablist" aria-label="Timer mode">
+    <button class="mode-tab active" data-mode="pomodoro" role="tab" aria-selected="true">Pomodoro</button>
+    <button class="mode-tab" data-mode="short" role="tab" aria-selected="false">Short Break</button>
+    <button class="mode-tab" data-mode="long" role="tab" aria-selected="false">Long Break</button>
+    <button class="mode-tab" data-mode="custom" role="tab" aria-selected="false">Custom</button>
+  </div>
+
+  <!-- SESSION LABEL -->
+  <div class="session-label">
+    <div class="session-dot" id="sessionDot"></div>
+    <span id="sessionLabelText">Focus Session</span>
+  </div>
+
+  <!-- TIMER RING -->
+  <div class="timer-container" aria-live="polite" aria-label="Timer">
+    <svg class="timer-ring-svg" viewBox="0 0 300 300">
+      <defs>
+        <linearGradient id="timerGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" stop-color="#F5A623"/>
+          <stop offset="100%" stop-color="#4A90D9"/>
+        </linearGradient>
+      </defs>
+      <circle class="ring-track" cx="150" cy="150" r="130"/>
+      <circle class="ring-progress" id="ringProgress" cx="150" cy="150" r="130"
+        stroke-dasharray="816.81"
+        stroke-dashoffset="0"/>
+    </svg>
+    <div class="timer-inner">
+      <div class="timer-display" id="timerDisplay">25:00</div>
+      <div class="timer-phase" id="timerPhase">Ready to focus</div>
+    </div>
+  </div>
+
+  <!-- POMODORO COUNT -->
+  <div class="pomodoro-count" aria-label="Pomodoro session progress">
+    <div class="pom-dot active" id="pom1"></div>
+    <div class="pom-dot" id="pom2"></div>
+    <div class="pom-dot" id="pom3"></div>
+    <div class="pom-dot" id="pom4"></div>
+  </div>
+
+  <!-- CONTROLS -->
+  <div class="controls">
+    <button class="btn-icon" id="btnReset" aria-label="Reset timer" title="Reset">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+    </button>
+    <button class="btn-primary" id="btnPlayPause" aria-label="Start timer">
+      <svg id="iconPlay" width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><polygon points="5,3 19,12 5,21"/></svg>
+      <svg id="iconPause" width="28" height="28" viewBox="0 0 24 24" fill="currentColor" style="display:none"><rect x="6" y="4" width="4" height="16" rx="1"/><rect x="14" y="4" width="4" height="16" rx="1"/></svg>
+    </button>
+    <button class="btn-icon" id="btnSkip" aria-label="Skip to next session" title="Skip">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polygon points="5,4 15,12 5,20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+    </button>
+  </div>
+
+  <!-- STATS ROW -->
+  <div class="stats-row" aria-label="Session statistics">
+    <div class="stat-card">
+      <div class="stat-value" id="statSessions">0</div>
+      <div class="stat-label">Sessions</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statFocusTime">0m</div>
+      <div class="stat-label">Focus Time</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" id="statStreak">0</div>
+      <div class="stat-label">Streak</div>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- CUSTOM SECTION -->
+  <div class="custom-section" id="customSection" aria-label="Custom timer settings">
+    <div class="custom-row">
+      <label for="customFocus">Focus Duration</label>
+      <div class="custom-slider-wrap">
+        <input type="range" class="custom-slider" id="customFocus" min="1" max="90" value="25" aria-label="Focus duration in minutes">
+        <div class="custom-val" id="customFocusVal">25 min</div>
+      </div>
+    </div>
+    <div class="custom-row">
+      <label for="customBreak">Break Duration</label>
+      <div class="custom-slider-wrap">
+        <input type="range" class="custom-slider" id="customBreak" min="1" max="30" value="5" aria-label="Break duration in minutes">
+        <div class="custom-val" id="customBreakVal">5 min</div>
+      </div>
+    </div>
+    <button class="btn-apply" id="btnApplyCustom">Apply & Start</button>
+  </div>
+
+  <!-- SETTINGS BAR -->
+  <div class="settings-bar" role="group" aria-label="Timer settings">
+    <span class="settings-label">Sound Alerts</span>
+    <div class="toggle-wrap">
+      <span class="toggle-label" id="soundToggleLabel">On</span>
+      <button class="toggle on" id="soundToggle" role="switch" aria-checked="true" aria-label="Toggle sound alerts"></button>
+    </div>
+  </div>
+
+  <hr class="divider">
+
+  <!-- TASKS -->
+  <div class="tasks-section">
+    <div class="tasks-header">
+      <h2 class="tasks-title">Session Tasks</h2>
+      <button class="btn-add-task" id="btnAddTask" aria-label="Add new task">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        Add Task
+      </button>
+    </div>
+
+    <div class="task-input-row" id="taskInputRow">
+      <input type="text" class="task-input" id="taskInput" placeholder="What are you working on?" maxlength="80" aria-label="New task name">
+      <button class="btn-confirm" id="btnConfirmTask">Add</button>
+    </div>
+
+    <div class="task-list" id="taskList">
+      <div class="empty-tasks" id="emptyTasks">No tasks yet — add one to track your focus</div>
+    </div>
+  </div>
+
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-links">
+    <a href="https://terms.pacedall.com" target="_blank" rel="noopener">Terms of Service</a>
+    <span class="footer-dot">•</span>
+    <a href="https://privacy.pacedall.com" target="_blank" rel="noopener">Privacy Policy</a>
+    <span class="footer-dot">•</span>
+    <a href="https://pacedall.com" target="_blank" rel="noopener">Pacedall Labs</a>
+  </div>
+  <div class="footer-copy">© 2026 Pacedall Labs. All rights reserved.</div>
+</footer>
+
+<!-- BACK TO TOP -->
+<button id="backToTop" aria-label="Back to top">
+  <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="18,15 12,9 6,15"/></svg>
+</button>
+
+<!-- TOAST -->
+<div class="toast" id="toast" role="alert" aria-live="assertive"></div>
+
+<script>
+// ──────────────────────────────────────────────
+//  STATE
+// ──────────────────────────────────────────────
+const MODES = {
+  pomodoro: { duration: 25 * 60, label: 'Focus Session', dotClass: '' },
+  short:    { duration:  5 * 60, label: 'Short Break',   dotClass: 'break' },
+  long:     { duration: 15 * 60, label: 'Long Break',    dotClass: 'long-break' },
+  custom:   { duration: 25 * 60, label: 'Custom Session',dotClass: 'custom' }
+};
+
+let state = {
+  mode: 'pomodoro',
+  running: false,
+  remaining: MODES.pomodoro.duration,
+  total: MODES.pomodoro.duration,
+  intervalId: null,
+  pomCount: 0,        // 0-3 (current position in set of 4)
+  completedPoms: 0,
+  focusMinutes: 0,
+  streak: 0,
+  sound: true,
+  tasks: [],
+  activeTaskIndex: null,
+  nextIsBreak: false,
+  customFocus: 25,
+  customBreak: 5
+};
+
+// ──────────────────────────────────────────────
+//  ELEMENTS
+// ──────────────────────────────────────────────
+const $display   = document.getElementById('timerDisplay');
+const $phase     = document.getElementById('timerPhase');
+const $ring      = document.getElementById('ringProgress');
+const $dot       = document.getElementById('sessionDot');
+const $label     = document.getElementById('sessionLabelText');
+const $play      = document.getElementById('iconPlay');
+const $pause     = document.getElementById('iconPause');
+const $btnPP     = document.getElementById('btnPlayPause');
+const $btnReset  = document.getElementById('btnReset');
+const $btnSkip   = document.getElementById('btnSkip');
+const $tabs      = document.querySelectorAll('.mode-tab');
+const $poms      = [1,2,3,4].map(i => document.getElementById('pom'+i));
+const $statSess  = document.getElementById('statSessions');
+const $statFocus = document.getElementById('statFocusTime');
+const $statStr   = document.getElementById('statStreak');
+const $customSec = document.getElementById('customSection');
+const $cFocus    = document.getElementById('customFocus');
+const $cFocusV   = document.getElementById('customFocusVal');
+const $cBreak    = document.getElementById('customBreak');
+const $cBreakV   = document.getElementById('customBreakVal');
+const $btnApply  = document.getElementById('btnApplyCustom');
+const $soundTog  = document.getElementById('soundToggle');
+const $soundLbl  = document.getElementById('soundToggleLabel');
+const $btnAdd    = document.getElementById('btnAddTask');
+const $taskRow   = document.getElementById('taskInputRow');
+const $taskInput = document.getElementById('taskInput');
+const $btnCnf    = document.getElementById('btnConfirmTask');
+const $taskList  = document.getElementById('taskList');
+const $emptyTask = document.getElementById('emptyTasks');
+const $toast     = document.getElementById('toast');
+const $backTop   = document.getElementById('backToTop');
+
+const CIRCUMFERENCE = 2 * Math.PI * 130; // 816.81
+$ring.style.strokeDasharray = CIRCUMFERENCE;
+
+// ──────────────────────────────────────────────
+//  TIMER CORE
+// ──────────────────────────────────────────────
+function formatTime(secs) {
+  const m = Math.floor(secs / 60).toString().padStart(2, '0');
+  const s = (secs % 60).toString().padStart(2, '0');
+  return `${m}:${s}`;
+}
+
+function updateRing() {
+  const progress = state.remaining / state.total;
+  const offset = CIRCUMFERENCE * (1 - progress);
+  $ring.style.strokeDashoffset = offset;
+}
+
+function updateDisplay() {
+  $display.textContent = formatTime(state.remaining);
+  document.title = `${formatTime(state.remaining)} — Pacedall Focus`;
+  updateRing();
+}
+
+function tick() {
+  if (state.remaining <= 0) {
+    clearInterval(state.intervalId);
+    state.running = false;
+    onSessionComplete();
+    return;
+  }
+  state.remaining--;
+  updateDisplay();
+}
+
+function startTimer() {
+  state.running = true;
+  state.intervalId = setInterval(tick, 1000);
+  $play.style.display = 'none';
+  $pause.style.display = '';
+  $phase.textContent = state.mode === 'pomodoro' || state.mode === 'custom' ? 'Focusing...' : 'On a break...';
+}
+
+function pauseTimer() {
+  clearInterval(state.intervalId);
+  state.running = false;
+  $play.style.display = '';
+  $pause.style.display = 'none';
+  $phase.textContent = 'Paused';
+}
+
+function resetTimer() {
+  clearInterval(state.intervalId);
+  state.running = false;
+  state.remaining = state.total;
+  $play.style.display = '';
+  $pause.style.display = 'none';
+  updateDisplay();
+  $phase.textContent = 'Ready to focus';
+}
+
+function onSessionComplete() {
+  $play.style.display = '';
+  $pause.style.display = 'none';
+
+  if (state.mode === 'pomodoro' || state.mode === 'custom') {
+    // Completed a focus session
+    state.completedPoms++;
+    state.focusMinutes += Math.round(state.total / 60);
+    state.streak++;
+    updateStats();
+    advancePomDot();
+    showToast('🎯 Session complete! Time for a break.');
+    playSound('complete');
+    // bump active task pomodoro count
+    if (state.activeTaskIndex !== null && state.tasks[state.activeTaskIndex]) {
+      state.tasks[state.activeTaskIndex].poms++;
+      renderTasks();
+    }
+    // Auto-switch to short/long break
+    if (state.completedPoms % 4 === 0) {
+      switchMode('long', false);
+    } else {
+      switchMode('short', false);
+    }
+  } else {
+    // Break done — switch back
+    showToast('💪 Break over — let\'s get back to it!');
+    playSound('break');
+    switchMode(state.customFocus !== 25 || state.mode === 'custom' ? 'custom' : 'pomodoro', false);
+  }
+}
+
+// ──────────────────────────────────────────────
+//  MODES
+// ──────────────────────────────────────────────
+function switchMode(mode, resetDot = true) {
+  if (state.running) pauseTimer();
+  state.mode = mode;
+  const m = MODES[mode];
+  if (mode === 'custom') {
+    m.duration = state.customFocus * 60;
+  }
+  state.total = m.duration;
+  state.remaining = m.duration;
+  $label.textContent = m.label;
+  $dot.className = 'session-dot ' + m.dotClass;
+  $phase.textContent = 'Ready to focus';
+  $play.style.display = '';
+  $pause.style.display = 'none';
+  updateDisplay();
+
+  // Update active tab
+  $tabs.forEach(t => {
+    const isActive = t.dataset.mode === mode;
+    t.classList.toggle('active', isActive);
+    t.setAttribute('aria-selected', isActive);
+  });
+
+  // Show/hide custom panel
+  $customSec.classList.toggle('visible', mode === 'custom');
+}
+
+$tabs.forEach(tab => {
+  tab.addEventListener('click', () => switchMode(tab.dataset.mode));
+});
+
+// ──────────────────────────────────────────────
+//  PLAY / PAUSE / RESET / SKIP
+// ──────────────────────────────────────────────
+$btnPP.addEventListener('click', () => {
+  if (state.running) pauseTimer(); else startTimer();
+});
+
+$btnReset.addEventListener('click', () => {
+  resetTimer();
+  showToast('Timer reset.');
+});
+
+$btnSkip.addEventListener('click', () => {
+  clearInterval(state.intervalId);
+  state.running = false;
+  onSessionComplete();
+});
+
+// ──────────────────────────────────────────────
+//  POMODORO DOTS
+// ──────────────────────────────────────────────
+function advancePomDot() {
+  const pos = state.completedPoms % 4;
+  $poms.forEach((d, i) => {
+    d.classList.remove('done', 'active');
+    if (i < pos) d.classList.add('done');
+    else if (i === pos) d.classList.add('active');
+  });
+}
+
+// ──────────────────────────────────────────────
+//  STATS
+// ──────────────────────────────────────────────
+function updateStats() {
+  $statSess.textContent = state.completedPoms;
+  $statFocus.textContent = state.focusMinutes >= 60
+    ? `${Math.floor(state.focusMinutes/60)}h ${state.focusMinutes%60}m`
+    : `${state.focusMinutes}m`;
+  $statStr.textContent = state.streak;
+}
+
+// ──────────────────────────────────────────────
+//  CUSTOM SLIDERS
+// ──────────────────────────────────────────────
+$cFocus.addEventListener('input', () => {
+  state.customFocus = parseInt($cFocus.value);
+  $cFocusV.textContent = `${state.customFocus} min`;
+});
+
+$cBreak.addEventListener('input', () => {
+  state.customBreak = parseInt($cBreak.value);
+  $cBreakV.textContent = `${state.customBreak} min`;
+});
+
+$btnApply.addEventListener('click', () => {
+  MODES.custom.duration = state.customFocus * 60;
+  MODES.short.duration = state.customBreak * 60;
+  switchMode('custom');
+  startTimer();
+  showToast(`Custom: ${state.customFocus}m focus / ${state.customBreak}m break`);
+});
+
+// ──────────────────────────────────────────────
+//  SOUND
+// ──────────────────────────────────────────────
+$soundTog.addEventListener('click', () => {
+  state.sound = !state.sound;
+  $soundTog.classList.toggle('on', state.sound);
+  $soundTog.setAttribute('aria-checked', state.sound);
+  $soundLbl.textContent = state.sound ? 'On' : 'Off';
+});
+
+function playSound(type) {
+  if (!state.sound) return;
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    if (type === 'complete') {
+      osc.frequency.setValueAtTime(880, ctx.currentTime);
+      osc.frequency.setValueAtTime(1100, ctx.currentTime + 0.15);
+      osc.frequency.setValueAtTime(1320, ctx.currentTime + 0.3);
+    } else {
+      osc.frequency.setValueAtTime(660, ctx.currentTime);
+      osc.frequency.setValueAtTime(550, ctx.currentTime + 0.2);
+    }
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.6);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.6);
+  } catch(e) {}
+}
+
+// ──────────────────────────────────────────────
+//  TASKS
+// ──────────────────────────────────────────────
+$btnAdd.addEventListener('click', () => {
+  $taskRow.classList.toggle('visible');
+  if ($taskRow.classList.contains('visible')) $taskInput.focus();
+});
+
+$taskInput.addEventListener('keydown', e => {
+  if (e.key === 'Enter') addTask();
+  if (e.key === 'Escape') $taskRow.classList.remove('visible');
+});
+
+$btnCnf.addEventListener('click', addTask);
+
+function addTask() {
+  const val = $taskInput.value.trim();
+  if (!val) return;
+  state.tasks.push({ name: val, done: false, poms: 0 });
+  $taskInput.value = '';
+  $taskRow.classList.remove('visible');
+  renderTasks();
+}
+
+function renderTasks() {
+  if (state.tasks.length === 0) {
+    $emptyTask.style.display = '';
+    $taskList.innerHTML = '';
+    $taskList.appendChild($emptyTask);
+    return;
+  }
+  $emptyTask.style.display = 'none';
+  $taskList.innerHTML = '';
+
+  state.tasks.forEach((task, i) => {
+    const el = document.createElement('div');
+    el.className = 'task-item' + (task.done ? ' done' : '') + (i === state.activeTaskIndex ? ' active-task' : '');
+    el.setAttribute('role', 'listitem');
+    el.innerHTML = `
+      <div class="task-check" aria-hidden="true">${task.done ? '✓' : ''}</div>
+      <div class="task-name">${escHtml(task.name)}</div>
+      ${task.poms > 0 ? `<div class="task-poms">${task.poms}🍅</div>` : ''}
+      <button class="task-delete" data-idx="${i}" aria-label="Delete task ${escHtml(task.name)}">✕</button>
+    `;
+    el.addEventListener('click', e => {
+      if (e.target.classList.contains('task-delete')) return;
+      if (task.done) return;
+      state.activeTaskIndex = (state.activeTaskIndex === i) ? null : i;
+      renderTasks();
+    });
+    el.querySelector('.task-delete').addEventListener('click', () => {
+      state.tasks.splice(i, 1);
+      if (state.activeTaskIndex === i) state.activeTaskIndex = null;
+      else if (state.activeTaskIndex > i) state.activeTaskIndex--;
+      renderTasks();
+    });
+    // long press / double click to mark done
+    el.addEventListener('dblclick', () => {
+      if (!task.done) {
+        task.done = true;
+        if (state.activeTaskIndex === i) state.activeTaskIndex = null;
+        renderTasks();
+        showToast('✅ Task completed!');
+      }
+    });
+    $taskList.appendChild(el);
+  });
+}
+
+function escHtml(str) {
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ──────────────────────────────────────────────
+//  TOAST
+// ──────────────────────────────────────────────
+let toastTimeout;
+function showToast(msg) {
+  $toast.textContent = msg;
+  $toast.classList.add('show');
+  clearTimeout(toastTimeout);
+  toastTimeout = setTimeout(() => $toast.classList.remove('show'), 3000);
+}
+
+// ──────────────────────────────────────────────
+//  BACK TO TOP
+// ──────────────────────────────────────────────
+window.addEventListener('scroll', () => {
+  $backTop.classList.toggle('visible', window.scrollY > 300);
+}, { passive: true });
+
+$backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+
+// ──────────────────────────────────────────────
+//  INIT
+// ──────────────────────────────────────────────
+updateDisplay();
+renderTasks();
+updateStats();
+</script>
+</body>
+</html>
